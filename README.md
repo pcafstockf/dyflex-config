@@ -39,7 +39,7 @@ As you read the code, keep in mind that for this example:
 * And of course, you would naturally want to use [async-injection](https://github.com/pcafstockf/async-injection/) (but you don't have to).
 
 ```typescript
-// Simple example representing an injectable database manager with injected settings.
+// Simple injectable database manager with injected settings.
 @Injectable()
 class MySqlDbMgr {
 	constructor(@Inject(Symbol.for(my-sql-conf)) conf: MySqlConfiguration) {
@@ -49,14 +49,14 @@ class MySqlDbMgr {
 }
 const DbMgrToken = new InjectionToken<MySqlDbMgr>('DbMgr');
 
-// Optionally define the global structure of your application configuration.
+// Optionally define the global structure of your app configuration.
 const DefaultAppConfig = {
 	// @ts-ignore  (see pkgToConfig function for details)
 	info: pkgToConfig(__dirname, __APP_NAME__, __APP_VERSION__, __APP_DESCRIPTION__),
 	mysql: {
 		// Flag this as the MySql configurtion object.
 		__conf_register: 'my-sql-conf',
-        // Describe the type structure, but actuall value merged in from .env
+        // Define the type, but actuall value merged from .env
 		host: undefined as unknown as string,
 		port: 3306,
 		user: undefined as unknown as string,
@@ -64,7 +64,7 @@ const DefaultAppConfig = {
 		password: '<%= fn.getSecret("my-app-passwd") %>',
 		database: 'my-app-database',
         // auto-wire a database connection service via dependency injection.
-        // Simply making the configuration, creates a fully configured, injectable, database manager.
+        // makeConfig (below), creates a fully configured, injectable, database manager.
 		__conf_init: {
 			fn: (di: Container) => di.bindClass(DbMgrToken, MySqlDbMgr).asSingleton()
 		}
@@ -90,7 +90,7 @@ const DefaultAppConfig = {
 	);
 	// Picked up from your package.json (see pkgToConfig).
 	console.log(`Running ${config.info.name} v${config.info.version}`);
-	// Note that thanks to async-injection, 'dbMgr' is fully typed as MySqlDbMgr.
+	// Thanks to async-injection, 'dbMgr' is fully typed as MySqlDbMgr.
 	const dbMgr = di.get(DbMgrToken);   
 })(minimist(process.argv.slice(2))).catch(e => console.error(e));
 ```
