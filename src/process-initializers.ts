@@ -1,4 +1,5 @@
 import {InitializerDesc, InitializerFn} from './initializers';
+import {ConfigMarkerPrefix, InitializeMarker} from './index';
 
 /**
  * Contextual information describing an initializer
@@ -17,7 +18,7 @@ export interface InitializerMeta<T = any> {
 export type Initializers<T = any> = Map<number, InitializerMeta<T>[]>;
 
 /**
- * Scan the configuration extracting the initialization markers (__conf_init).
+ * Scan the configuration extracting the initialization markers @see InitializeMarker.
  * @param config A fully merged and evaluated configuration.
  * @return  A priority ordered Map of initializer functions discovered inside the configuration.
  */
@@ -30,9 +31,9 @@ export function discoverInitializers<T = any>(
 		let propKey: PropertyKey;
 		for (propKey in obj) {
 			// Scan for objects containing our magic properties
-			if (typeof propKey === 'string' && propKey.startsWith('__conf_')) {
+			if (typeof propKey === 'string' && propKey.startsWith(ConfigMarkerPrefix)) {
 				switch (propKey) {
-					case '__conf_init':
+					case InitializeMarker:
 						if (typeof obj[propKey] === 'object') {
 							const ro = obj[propKey] as InitializerDesc<T>;
 							if (typeof ro.fn === 'function' && (typeof ro.priority === 'number' || typeof ro.priority === 'undefined')) {

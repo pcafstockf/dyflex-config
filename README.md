@@ -104,7 +104,7 @@ which describes the structure (e.g. `interface` type) of the configuration for a
 This saves you from having to define a configuration `interface`, as it is derivable from the `const` declaration of the default base configuration  
 (e.g. `type AppConfigType = typeof DefaultAppConfig;`).
 
-Your application can defines its own (global) default base configuration, by simply merging together 
+Your application can define its own (global) default base configuration, by simply merging together 
 default base configurations from various modules within your application.
 
 ### Loading
@@ -146,7 +146,7 @@ See `evalConfig` for more info.
 The default base configuration (`const`) fragments, can contain **initializers** which are simply factory functions that
 automatically process configuration data to construct (and typically register) a service with the Dependency Injection Container.  
 This means that adding services to your application is usually as simple as defining a default base configuration.  
-You will likely need to provide configuration override data, such as username and/or password (.env, json, etc), but that's it!  
+You will likely need to provide configuration override data, such as username and/or password (.env, json, etc.), but that's it!  
 See `discoverInitializers` and `invokeInitializers` for more info.
 
 ## Implementation Notes

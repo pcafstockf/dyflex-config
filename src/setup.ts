@@ -12,10 +12,10 @@ export {keyValueToConfig, loadConfigFile, pkgToConfig, mergeConfig, evalConfig, 
  */
 export interface ConfigOpts<CTX = any> {
 	/**
-	 * The callback will be invoked for each sub-object discovered in the configuration that has a '__conf_register' property.
+	 * The callback will be invoked for each sub-object discovered in the configuration that has a @see RegisterConfigMarker property.
 	 * This callback is typically used to bind the configuration into a dependency injection container.
-	 * @param key   The *value* of the __conf_register property (which must be a string) converted via Symbol.for().
-	 * @param obj   The object that contained the __conf_register property.
+	 * @param key   The *value* of the @see RegisterConfigMarker property (which must be a string) converted via Symbol.for().
+	 * @param obj   The object that contained the @see RegisterConfigMarker property.
 	 * @param path  The location of the 'obj' within the configuration.
 	 */
 	evalCb?: (key: symbol, obj: object, path: string[]) => void;

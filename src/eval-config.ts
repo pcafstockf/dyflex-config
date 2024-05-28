@@ -1,5 +1,6 @@
 import {template as lodashTemplate, TemplateExecutor, get as lodashGet, toPath as lodashToPath} from 'lodash';
 import constants from 'node:constants';
+import {ConfigMarkerPrefix, RegisterConfigMarker} from './index';
 
 /**
  * Helper to convert strings to false (pretty much any other string evaluates to truthy
@@ -33,7 +34,7 @@ export type RegistrarFn = (key: symbol, obj: object | undefined, path: string[] 
  * Walk the configuration looking for markers, as well as strings that should be interpolated.
  *
  * @param config    The fully merged configuration.
- * @param register  User provided hook invoked for any object containing the '__reg_config' property.
+ * @param registrar  User provided hook invoked for any object containing the @see RegisterConfigMarker property.
  *                   Typically used to bind into a Dependency Injection Container.
  *                   @see RegistrarFn
  * @param evalExt   Allows for caller defined interpolation functions.
@@ -54,9 +55,9 @@ export function evalConfig<T extends object>(
 		let propKey: PropertyKey;
 		for (propKey in obj) {
 			// Look for markers and process relevant ones.
-			if (typeof propKey === 'string' && propKey.startsWith('__conf_')) {
+			if (typeof propKey === 'string' && propKey.startsWith(ConfigMarkerPrefix)) {
 				switch (propKey) {
-					case '__conf_register':
+					case RegisterConfigMarker:
 						// This little snippet allows us to use our "default config as code" infrastructure to automatically bind sub-configurations.
 						if (typeof obj[propKey] === 'string')
 							obj[propKey] = Symbol.for(obj[propKey]);
