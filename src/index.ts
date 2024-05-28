@@ -1,8 +1,11 @@
-import {cloneDeep, merge} from 'lodash';
-
-export const ConfigMarkerPrefix = '__conf_';
-export const RegisterConfigMarker = `${ConfigMarkerPrefix}register`;
-export const InitializeMarker = `${ConfigMarkerPrefix}init`;
-
+export * from './markers';
+export * from './eval-config';
+export * from './merge-config';
+export {loadConfigFile} from './load-fs-config';
+export {keyValueToConfig} from './kvp-to-config';
+export {pkgToConfig} from './pkg-to-config';
 export * from './initializers';
-export {merge as lodashMerge, cloneDeep as lodashCloneDeep};
+export * from './process-initializers';
+export {makeConfig} from './setup';
+
+export {merge as lodashMerge, cloneDeep as lodashCloneDeep} from 'lodash';

@@ -1,5 +1,5 @@
+import {ConfigMarkerPrefix, InitializeMarker} from '@async-injection/markers';
 import {InitializerDesc, InitializerFn} from './initializers';
-import {ConfigMarkerPrefix, InitializeMarker} from './index';
 
 /**
  * Contextual information describing an initializer
