@@ -1,4 +1,4 @@
-import {ConfigMarkerPrefix, InitializeMarker} from '@async-injection/markers';
+import {ConfigMarkerPrefix, InitializeMarker} from './markers';
 import {InitializerDesc, InitializerFn} from './initializers';
 
 /**

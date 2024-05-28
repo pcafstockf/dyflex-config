@@ -1,6 +1,6 @@
-import {ConfigMarkerPrefix, RegisterConfigMarker} from '@async-injection/markers';
 import {template as lodashTemplate, TemplateExecutor, get as lodashGet, toPath as lodashToPath} from 'lodash';
 import constants from 'node:constants';
+import {ConfigMarkerPrefix, RegisterConfigMarker} from './markers';
 
 /**
  * Helper to convert strings to false (pretty much any other string evaluates to truthy
