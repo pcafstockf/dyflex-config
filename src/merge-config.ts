@@ -1,4 +1,4 @@
-import {get as lodashGet, mergeWith as lodashMergeWith, set as lodashSet} from 'lodash';
+import {get as lodashGet, mergeWith as lodashMergeWith, set as lodashSet, union as lodashUniton} from 'lodash';
 
 /**
  * A unique marker used as the default value for lodashGet.
@@ -33,6 +33,8 @@ export function mergeConfig<T extends object>(dst: T, src: object, mergePoint?: 
 			});
 			object[key.substring(1)] = srcValue;
 		}
+		else if (Array.isArray(objValue))
+			return lodashUniton(objValue, srcValue);
 		return undefined;
 	});
 	deletes.forEach(d => d());

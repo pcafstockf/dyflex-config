@@ -151,11 +151,15 @@ See `discoverInitializers` and `invokeInitializers` for more info.
 
 ## Implementation Notes
 lodash.merge is used for configuration merging (along with lodash.set if you are merging at a key prefixed merge point).  
-Understanding how lodash.merge actually works is important, so please read [its documentation](https://lodash.com/docs/#merge).  Once you understand it,
-you will see a problem...
-* How do I replace an object or an array of values?
+Understanding how lodash.merge actually works is important, so please read [its documentation](https://lodash.com/docs/#merge).  
+Once you understand it,
+you will see a problem that this library uses  [lodash.mergeWith](https://lodash.com/docs/#mergeWith) to address...
+* How do I merge two arrays (instead of having the left array replaced by the right).
+* How do I replace an object (as opposed to merging it)?
 
-This library actually uses [lodash.mergeWith](https://lodash.com/docs/#mergeWith) in order to implement a "not" ability (aka `!`, aka _bang_, aka _replacement_).  
+To address the first, we use lodash.union to 'merge' arrays which is (IMO) the intuitive behavior. 
+If you really did want to replace the left arry with the right, you can us the 'not' feature described next.  
+To address the second, we implement a "not" ability (aka `!`, aka _bang_, aka _replacement_).  
 This feature allows you to **overwrite** a node in the hierarchy instead of merging.
 ```json5
 // Merging in this json5 override will "merge" the values into configuration,

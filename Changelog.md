@@ -1,3 +1,6 @@
+## 1.0.3 / 2024-05-30
+* When merging config, union arrays (instead of right replacing left).
+
 ## 1.0.2 / 2024-05-27 (No functional changes)
 * Improve index.ts
 
