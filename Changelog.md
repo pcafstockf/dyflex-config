@@ -1,3 +1,7 @@
+## 1.1.0 / 2024-08-03
+* When merging config, allow for lodash merge of arrays (overriding the default union behavior introduced in v1.0.3).
+* Update patch level dependencies
+
 ## 1.0.3 / 2024-05-30
 * When merging config, union arrays (instead of right replacing left).
 

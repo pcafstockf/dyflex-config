@@ -13,7 +13,7 @@ Configuration from command line opts, from env, from json, from properties files
 Some options vary from environment to environment and from developer to developer.  
 But importantly, some options just don't; They are only there to help future-proof your app.  
 Then if that's not complicated enough, sometimes you need to pull in **pieces** of config from different locations.  
-And of course we won't talk about Java's beloved @AutoWire 😉.
+And of course, wouldn't functionality like Java's @AutoWire be nice?
 
 ## Installation
 You can get the latest release using npm:
@@ -154,13 +154,15 @@ lodash.merge is used for configuration merging (along with lodash.set if you are
 Understanding how lodash.merge actually works is important, so please read [its documentation](https://lodash.com/docs/#merge).  
 Once you understand it,
 you will see a problem that this library uses  [lodash.mergeWith](https://lodash.com/docs/#mergeWith) to address...
-* How do I merge two arrays (instead of having the left array replaced by the right).
+* How do I merge **or** union two arrays (instead of having the right array simply replace the left).
 * How do I replace an object (as opposed to merging it)?
 
-To address the first, we use lodash.union to 'merge' arrays which is (IMO) the intuitive behavior. 
-If you really did want to replace the left arry with the right, you can us the 'not' feature described next.  
+By default, we use lodash.union to 'merge' arrays which is (IMO) the intuitive behavior. 
+If you really did want to replace the left array with the right, you can us the 'not' feature described next.  
 To address the second, we implement a "not" ability (aka `!`, aka _bang_, aka _replacement_).  
 This feature allows you to **overwrite** a node in the hierarchy instead of merging.
+Finally, if you want the standard lodash merge behavior for arrays (instead of our default union behavior), 
+you can prefix the key with `%`.
 ```json5
 // Merging in this json5 override will "merge" the values into configuration,
 // but completely replace anything at or below 'http.authn' (if it existed).
@@ -170,7 +172,8 @@ This feature allows you to **overwrite** a node in the hierarchy instead of merg
       "username": "foo",
       "password": "bar"
     },
-    "some-key": "baz"
+    "some-key": "baz",
+    "%some-array": ["one","two"]
   }
 }
 ```
