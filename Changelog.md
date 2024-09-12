@@ -1,3 +1,6 @@
+## 1.1.1 / 2024-09-11
+* Implement cjs/esm packaging lessons learned from [async-injection](https://github.com/pcafstockf/async-injection).
+
 ## 1.1.0 / 2024-08-03
 * When merging config, allow for lodash merge of arrays (overriding the default union behavior introduced in v1.0.3).
 * Update patch level dependencies
