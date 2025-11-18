@@ -1,3 +1,6 @@
+## 1.1.1 / 2025-11-18
+* Updated devDependencies (dependabot alerts about build toolchain).
+
 ## 1.1.1 / 2024-09-11
 * Implement cjs/esm packaging lessons learned from [async-injection](https://github.com/pcafstockf/async-injection).
 
