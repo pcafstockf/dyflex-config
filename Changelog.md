@@ -1,3 +1,8 @@
+## 1.2.0 / 2026-02-13
+* Fixed ESM imports by adding `.js` extensions to all relative imports (using tsc-esm-fix)
+* Use lodash-es for ESM builds
+* Added package.json exports for browser entry point (`browser-index.ts`) that excludes Node.js functions.
+
 ## 1.1.1 / 2025-11-18
 * Updated devDependencies (dependabot alerts about build toolchain).
 

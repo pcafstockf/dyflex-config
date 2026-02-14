@@ -1,5 +1,5 @@
 import {parse as parseJson5} from 'json5/lib';
-import {set as lodashSet} from 'lodash';
+import {lodashSet} from './lodash-imports';
 
 /**
  * Process key/value pairs of configuration related data.

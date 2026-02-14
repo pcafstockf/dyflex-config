@@ -1,19 +1,19 @@
 # dyflex-config
 [![CI Actions](https://github.com/pcafstockf/dyflex-config/workflows/CI/badge.svg)](https://github.com/pcafstockf/dyflex-config/actions)
 [![Publish Actions](https://github.com/pcafstockf/dyflex-config/workflows/NPM%20Publish/badge.svg)](https://github.com/pcafstockf/dyflex-config/actions)
-[![npm version](https://badge.fury.io/js/dyflex-config.svg)](https://badge.fury.io/js/dyflex-config)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
 ![OSS Lifecycle](https://img.shields.io/osslifecycle/pcafstockf/dyflex-config.svg)
+[![npm version](https://img.shields.io/npm/v/dyflex-config)](https://www.npmjs.com/package/dyflex-config)
 
 Simple, dynamic, flexible, modular, extensible, templated, configuration library.
 
 ## Why another configuration library?
-Many backend projects need to read a configuration file.  
+Many projects need to load configuration.  
 Configuration from command line opts, from env, from json, from properties files, and on and on.  
 Some options vary from environment to environment and from developer to developer.  
 But importantly, some options just don't; They are only there to help future-proof your app.  
-Then if that's not complicated enough, sometimes you need to pull in **pieces** of config from different locations.  
-And of course, wouldn't functionality like Java's @AutoWire be nice?
+If that's not complicated enough, sometimes you need to pull in **pieces** of config from different locations.  
+And speaking of dynamic configuration, wouldn't functionality like Java's @AutoWire be nice?
 
 ## Installation
 You can get the latest release using npm:
@@ -23,11 +23,41 @@ $ npm install dyflex-config --save
 Please note that this library supports a wide variety of runtimes and is distributed as both esm and cjs modules, side by side.
 
 ## Concepts
-I believe configuration needs to be:
+I believe configuration should be:
 * reference-able (to eliminate duplication)
 * override-able (for different envs)
 * modular (for generation and maintainability)
-* compose-able (to reverse modularity 😃 and more easily support override-ability)
+* compose-able (to **reverse** modularity 😃 and more easily support override-ability)
+
+## ESM and CommonJS Support
+
+This library recognizes the realities we live in and fully supports both ESM and CommonJS module systems:
+
+**ESM (import):**
+```typescript
+import { makeConfig, mergeConfig, evalConfig } from 'dyflex-config';
+```
+
+**CommonJS (require):**
+```javascript
+const { makeConfig, mergeConfig, evalConfig } = require('dyflex-config');
+```
+
+## Browser Compatibility
+
+**Note:** Some features depend on Node.js-specific APIs:
+
+- `loadConfigFile()` - Uses Node.js `fs` module (not browser-compatible)
+- `pkgToConfig()` - Uses Node.js `fs` module (not browser-compatible)
+
+**Browser and Node.js compatible functions:**
+- `makeConfig()`
+- `mergeConfig()`
+- `evalConfig()`
+- `keyValueToConfig()`
+
+For browser usage, the package automatically provides a browser-specific entry point that excludes Node.js-only functions.
+Modern bundlers will automatically use this when building for browser environments.
 
 ## Show me some code
 Some folks like the details (below), some folks want to see the code first...

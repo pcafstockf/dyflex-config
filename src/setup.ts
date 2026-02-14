@@ -1,11 +1,9 @@
 import {evalConfig} from './eval-config';
 import {keyValueToConfig} from './kvp-to-config';
-import {loadConfigFile} from './load-fs-config';
 import {mergeConfig} from './merge-config';
-import {pkgToConfig} from './pkg-to-config';
 import {discoverInitializers, invokeInitializers} from './process-initializers';
 
-export {keyValueToConfig, loadConfigFile, pkgToConfig, mergeConfig, evalConfig, discoverInitializers, invokeInitializers};
+export {keyValueToConfig, mergeConfig, evalConfig, discoverInitializers, invokeInitializers};
 
 /**
  * Options for @see makeConfig

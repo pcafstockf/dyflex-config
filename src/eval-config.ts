@@ -1,6 +1,5 @@
-import {template as lodashTemplate, TemplateExecutor, get as lodashGet, toPath as lodashToPath} from 'lodash';
-import constants from 'node:constants';
 import {ConfigMarkerPrefix, RegisterConfigMarker} from './markers';
+import {lodashTemplate, lodashGet, lodashToPath, TemplateExecutor} from './lodash-imports';
 
 /**
  * Helper to convert strings to false (pretty much any other string evaluates to truthy
@@ -89,7 +88,7 @@ export function evalConfig<T extends object>(
 						}
 						catch (e) {
 							const err: NodeJS.ErrnoException = new Error(`Unable to eval config at ${propPath.join('->')}`);
-							err.errno = constants.EINVAL;
+							err.errno = 22; // constants.EINVAL; (do not suck in a dependency on node for this).
 							err.code = 'EINVAL';
 							(err as any).cause = e;
 							throw err;
@@ -190,7 +189,7 @@ export function evalConfig<T extends object>(
 										err = new Error(`Config property ${propKeyPath.join('.')} is not defined`);
 									else
 										err = new Error(`Unable to interpolate config ${propKeyPath.join('.')}`);
-									err.errno = constants.EPROTO;
+									err.errno = 100; // constants.EPROTO; (do not suck in a dependency on node for this).
 									err.code = 'EPROTO';
 									(err as any).cause = e;
 									throw err;

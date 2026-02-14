@@ -1,4 +1,4 @@
-import {get as lodashGet, mergeWith as lodashMergeWith, set as lodashSet, union as lodashUnion, merge as lodashMerge} from 'lodash';
+import {lodashGet, lodashMergeWith, lodashSet, lodashUnion, lodashMerge} from './lodash-imports';
 
 /**
  * A unique marker used as the default value for lodashGet.
