@@ -1,6 +1,6 @@
 {
 	"name": "dyflex-config",
-	"version": "1.1.2",
+	"version": "1.2.0",
 	"description": "Simple, dynamic, flexible, configuration library.",
 	"author": "Frank Stock",
 	"license": "MIT",
