@@ -1,21 +1,11 @@
 {
-	"extends": "./tsconfig.cjs.json",
+	"extends": "./tsconfig.base.json",
 	"compilerOptions": {
-		"paths": {
-			"@async-injection": [
-				"src/index.ts"
-			],
-			"@async-injection/*": [
-				"src/*"
-			]
-		}
+		"module": "commonjs",
+		"moduleResolution": "node"
 	},
 	"include": [
 		"./src/**/*",
-		"./tst/**/*"
-	],
-	"ts-node": {
-		"transpileOnly": true,
-		"experimentalResolver": true
-	}
+		"./spec/**/*"
+	]
 }

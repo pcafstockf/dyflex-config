@@ -46,10 +46,10 @@
 	"scripts": {
 		"clean": "rimraf ./lib && rimraf ./.nyc_output && rimraf ./coverage",
 		"fullclean": "npm run clean && rimraf ./package-lock.json && rimraf ./node_modules",
-		"test": "TS_NODE_PROJECT=./tsconfig-test.json  node --require ts-node/register --require tsconfig-paths/register node_modules/jasmine/bin/jasmine.js --config=jasmine.json",
+		"test": "tsx node_modules/jasmine/bin/jasmine.js --config=jasmine.json",
 		"coverage": "rimraf coverage && rimraf ./nyc_output && nyc -e .ts -x \"**/*.spec.ts\" -x \"tst/*\" --reporter=text-summary --reporter=lcov npm run test",
 		"build": "npm run clean && tsc -p tsconfig.base.json && tsc -p tsconfig.esm.json && tsc-esm-fix --target=lib/esm && tsc -p tsconfig.cjs.json && npm run _postbuild",
-		"_postbuild": "echo '{\"type\": \"module\"}' >lib/esm/package.json && echo '{\"type\": \"commonjs\"}' >lib/cjs/package.json && node -e \"require('fs').writeFileSync('lib/esm/lodash-imports.js', 'export {default as template} from \\\"lodash-es/template.js\\\";\\nexport {default as get} from \\\"lodash-es/get.js\\\";\\nexport {default as toPath} from \\\"lodash-es/toPath.js\\\";\\nexport {default as mergeWith} from \\\"lodash-es/mergeWith.js\\\";\\nexport {default as set} from \\\"lodash-es/set.js\\\";\\nexport {default as union} from \\\"lodash-es/union.js\\\";\\nexport {default as merge} from \\\"lodash-es/merge.js\\\";\\nexport {default as cloneDeep} from \\\"lodash-es/cloneDeep.js\\\";\\n')\" && node -e \"require('fs').writeFileSync('lib/cjs/lodash-imports.js', '\\\"use strict\\\";\\nObject.defineProperty(exports, \\\"__esModule\\\", { value: true });\\nexports.template = exports.get = exports.toPath = exports.mergeWith = exports.set = exports.union = exports.merge = exports.cloneDeep = void 0;\\nconst lodash_1 = require(\\\"lodash\\\");\\nexports.template = lodash_1.template;\\nexports.get = lodash_1.get;\\nexports.toPath = lodash_1.toPath;\\nexports.mergeWith = lodash_1.mergeWith;\\nexports.set = lodash_1.set;\\nexports.union = lodash_1.union;\\nexports.merge = lodash_1.merge;\\nexports.cloneDeep = lodash_1.cloneDeep;\\n')\""
+		"_postbuild": "echo '{\"type\": \"module\"}' >lib/esm/package.json && echo '{\"type\": \"commonjs\"}' >lib/cjs/package.json && node -e \"require('fs').writeFileSync('lib/esm/lodash-imports.js', 'export {default as lodashTemplate} from \\\"lodash-es/template.js\\\";\\nexport {default as lodashGet} from \\\"lodash-es/get.js\\\";\\nexport {default as lodashToPath} from \\\"lodash-es/toPath.js\\\";\\nexport {default as lodashMergeWith} from \\\"lodash-es/mergeWith.js\\\";\\nexport {default as lodashSet} from \\\"lodash-es/set.js\\\";\\nexport {default as lodashUnion} from \\\"lodash-es/union.js\\\";\\nexport {default as lodashMerge} from \\\"lodash-es/merge.js\\\";\\nexport {default as lodashCloneDeep} from \\\"lodash-es/cloneDeep.js\\\";\\n')\""
 	},
 	"dependencies": {
 		"json5": "~2.2.3",
@@ -77,6 +77,7 @@
 		"tsc-esm-fix": "~3.1.2",
 		"tsconfig-paths": "~4.2.0",
 		"tslib": "~2.8.1",
+		"tsx": "~4.21.0",
 		"typescript": "~5.9.3"
 	}
 }
