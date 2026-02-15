@@ -43,24 +43,22 @@ import { makeConfig, mergeConfig, evalConfig } from 'dyflex-config';
 const { makeConfig, mergeConfig, evalConfig } = require('dyflex-config');
 ```
 
-## Browser Compatibility
-
-**Note:** Some features depend on Node.js-specific APIs:
-
-- `loadConfigFile()` - Uses Node.js `fs` module (not browser-compatible)
-- `pkgToConfig()` - Uses Node.js `fs` module (not browser-compatible)
-
-**Browser and Node.js compatible functions:**
+##  Universal functions:
 - `makeConfig()`
 - `mergeConfig()`
 - `evalConfig()`
 - `keyValueToConfig()`
 
-For browser usage, the package automatically provides a browser-specific entry point that excludes Node.js-only functions.
+**Note:** Some functions depend on Node.js-specific APIs:
+
+- `loadConfigFile()` - Uses Node.js `fs` module (not browser-compatible)
+- `pkgToConfig()` - Uses Node.js `fs` module (not browser-compatible)
+
+For browser usage, the package automatically provides a browser-specific entry point which excludes Node.js-only functions.
 Modern bundlers will automatically use this when building for browser environments.
 
 ## Show me some code
-Some folks like the details (below), some folks want to see the code first...
+Some folks like the details (below), other folks want to see the code first...
 
 As you read the code, keep in mind that for this example:
 * We are trying to show a myriad of features but still keep it simple.
