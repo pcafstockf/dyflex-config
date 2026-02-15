@@ -1,4 +1,4 @@
-import {parse as parseJson5} from 'json5/lib';
+import JSON5 from 'json5';
 import fs from 'node:fs';
 import path from 'node:path';
 
@@ -39,7 +39,7 @@ export function pkgToConfig(searchDir?: string, name?: string, version?: string,
 			}
 			if (stat?.isFile()) {
 				const txt = fs.readFileSync(fileName, 'utf-8');
-				const obj = parseJson5(txt);
+				const obj = JSON5.parse(txt);
 				if (obj) {
 					appName = obj.name;
 					appVersion = obj.version;

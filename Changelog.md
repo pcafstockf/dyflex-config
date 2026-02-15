@@ -1,6 +1,9 @@
 ## 1.2.0 / 2026-02-14
-* Fixed ESM imports by adding `.js` extensions to all relative imports (using tsc-esm-fix)
-* Use lodash-es for ESM builds
+* ESM fixes:
+    - Added `.js` extensions to all relative imports (using tsc-esm-fix)
+    - Use lodash-es for ESM builds
+    - json5 imports now ESM compatible
+    - peer dependency loading (yaml, dotenv, properties-reader) to by using dynamic imports
 * Use tsx for tests
 * Added package.json exports for browser entry point (`browser-index.ts`) that excludes Node.js functions.
 

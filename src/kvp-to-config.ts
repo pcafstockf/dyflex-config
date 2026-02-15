@@ -1,4 +1,4 @@
-import {parse as parseJson5} from 'json5/lib';
+import JSON5 from 'json5';
 import {lodashSet} from './lodash-imports';
 
 /**
@@ -31,7 +31,7 @@ export function keyValueToConfig<T = object>(pairs: string | string[], sep = '='
 			throw new Error('Invalid property key: ' + v);
 		try {
 			const key = kvp[0].trim();
-			p[key] = parseJson5(kvp[1].trim());
+			p[key] = JSON5.parse(kvp[1].trim());
 		}
 		catch {
 			throw new Error('Invalid property value for key: ' + kvp[0].trim());

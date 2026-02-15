@@ -1,47 +1,45 @@
-import {parse as parseJson5} from 'json5/lib';
+import JSON5 from 'json5';
 import {lodashSet} from './lodash-imports';
 import constants from 'node:constants';
 import fs from 'node:fs';
 import path from 'node:path';
 
-type propertiesReaderType = typeof import('properties-reader') | undefined;
-const propertiesReader = (function () {
+const loadPropertiesReader = async () => {
 	try {
-		return require('properties-reader');
+		const pr = await import('properties-reader');
+		return (pr.default || pr) as typeof import('properties-reader');
 	}
 	catch (e) {
 	}
 	return undefined;
-})() as propertiesReaderType;
-type parseDotEnvType = typeof import('dotenv').parse | undefined;
-const parseDotEnv = (function () {
+};
+const loadParseDotEnv = async () => {
 	try {
-		return require('dotenv').parse;
+		const dotenv = await import('dotenv');
+		return dotenv.parse;
 	}
 	catch (e) {
 	}
 	return undefined;
-})() as parseDotEnvType;
-type expandDotEnvType = typeof import('dotenv-expand').expand | undefined;
-const expandDotEnv = (function () {
-	if (parseDotEnv) {
+};
+const loadExpandDotEnv = async () => {
 		try {
-			return require('dotenv-expand').expand;
+			const dotenvExpand = await import('dotenv-expand');
+			return dotenvExpand.expand;
 		}
 		catch (e) {
 		}
-	}
 	return undefined;
-})() as expandDotEnvType;
-type parseYamlType = typeof import('yaml').parse | undefined;
-const parseYaml = (function () {
+};
+const loadParseYaml = async () => {
 	try {
-		return require('yaml').parse;
+		const yaml = await import('yaml');
+		return yaml.parse;
 	}
 	catch (e) {
 	}
 	return undefined;
-})() as parseYamlType;
+};
 
 /**
  * Simple helper
@@ -94,6 +92,7 @@ export async function loadConfigFile<T = object>(filepath: string, opts?: LoadCo
 	if (filename.lastIndexOf('.') === 0)
 		ext = path.extname('hack' + filename).toLowerCase();
 	if (ext === '.properties' || ext === '.ini') {
+		const propertiesReader = await loadPropertiesReader();
 		if (!propertiesReader)
 			throw unsupportedExtensionErr(ext);
 		// These types of files support dotted keys.
@@ -107,9 +106,11 @@ export async function loadConfigFile<T = object>(filepath: string, opts?: LoadCo
 		const txt = await fs.promises.readFile(filepath, encoding || 'utf-8');
 		switch (ext) {
 			case '.env':
+				const parseDotEnv = await loadParseDotEnv();
 				if (!parseDotEnv)
 					throw unsupportedExtensionErr(ext);
 				obj = parseDotEnv(txt);
+				const expandDotEnv = await loadExpandDotEnv();
 				if (expandDotEnv) {
 					const providedData = typeof opts === 'object' && opts.data ? opts.data : {};
 					const expData = {
@@ -129,13 +130,15 @@ export async function loadConfigFile<T = object>(filepath: string, opts?: LoadCo
 				}
 				break;
 			case '.yaml':
+			case '.yml':
+				const parseYaml = await loadParseYaml();
 				if (!parseYaml)
 					throw unsupportedExtensionErr(ext);
 				obj = parseYaml(txt);
 				break;
 			case '.json':
 			case '.json5':
-				obj = parseJson5(txt);
+				obj = JSON5.parse(txt);
 				break;
 			default:
 				throw unsupportedExtensionErr(ext);
