@@ -1,6 +1,6 @@
 import {loadConfigFile} from '../src/load-fs-config';
 
-describe('Read Configuration options from key/value pairs (typically cli)', () => {
+describe('Read Configuration options from files', () => {
 	const originalTimeout = jasmine.DEFAULT_TIMEOUT_INTERVAL;
 
 	beforeAll(() => {

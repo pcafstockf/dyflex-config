@@ -1,1 +1,1 @@
-export {template as lodashTemplate, get as lodashGet, toPath as lodashToPath, mergeWith as lodashMergeWith, set as lodashSet, union as lodashUnion, merge as lodashMerge, cloneDeep as lodashCloneDeep, TemplateExecutor} from 'lodash';
+export {template as lodashTemplate, get as lodashGet, toPath as lodashToPath, mergeWith as lodashMergeWith, set as lodashSet, unionWith as lodashUnionWith, isEqual as lodashIsEqual, TemplateExecutor} from 'lodash';

@@ -1,3 +1,8 @@
+## 1.3.0 / 2026-02-15
+* More capable config merging + export of merge utility function (`mergeViaDirectives`). 
+* Upgraded tsc target to `es2019` (but dist is still fully es2017 compatible). 
+* Upgrade dependencies, which flushed out duplicate (incorrect) test suite name.
+
 ## 1.2.0 / 2026-02-14
 * ESM fixes:
     - Added `.js` extensions to all relative imports (using tsc-esm-fix)
