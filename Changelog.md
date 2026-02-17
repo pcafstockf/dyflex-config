@@ -1,3 +1,6 @@
+## 1.3.1 / 2026-02-15
+* Replace tsx slop nightmare, with trustworthy ts-node.
+
 ## 1.3.0 / 2026-02-15
 * More capable config merging + export of merge utility function (`mergeViaDirectives`). 
 * Upgraded tsc target to `es2019` (but dist is still fully es2017 compatible). 
