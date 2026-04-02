@@ -1,3 +1,6 @@
+## 1.3.3 / 2026-04-02
+* Update lodash dependency.
+
 ## 1.3.2 / 2026-03-26
 * Simple dev and peer dependency updates.
 
