@@ -1,3 +1,6 @@
+## 1.3.4 / 2026-05-25
+* Fix tupple mergepoint defect.
+
 ## 1.3.3 / 2026-04-02
 * Update lodash dependency.
 

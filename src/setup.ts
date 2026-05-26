@@ -1,6 +1,6 @@
 import {evalConfig} from './eval-config';
 import {keyValueToConfig} from './kvp-to-config';
-import {mergeConfig} from './merge-config';
+import {mergeConfig, mergeConfigs} from './merge-config';
 import {discoverInitializers, invokeInitializers} from './process-initializers';
 
 export {keyValueToConfig, mergeConfig, evalConfig, discoverInitializers, invokeInitializers};
@@ -42,12 +42,7 @@ export interface ConfigOpts<CTX = any> {
 export async function makeConfig<CONF extends object = object, CTX = any>(conf: CONF, opts: ConfigOpts<CTX>, ...overrides: object[]) {
 	if (!conf)
 		conf = {} as CONF;
-	overrides?.forEach(c => {
-		if (Array.isArray(c))
-			mergeConfig<CONF>(conf, c[1], c[0]);
-		else if (c && typeof c === 'object')
-			mergeConfig<CONF>(conf, c);
-	});
+	mergeConfigs(conf, overrides);
 	evalConfig(conf, opts.evalCb, opts.evalExt);
 	if (opts.ctx) {
 		const initializers = discoverInitializers(conf);

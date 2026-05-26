@@ -108,7 +108,8 @@ export function mergeConfig<T extends object>(dst: T, src: object, mergePoint?: 
 			return dst;
 		}
 	}
-	return mergeViaDirectives(mp, src);
+	mergeViaDirectives(mp, src);
+	return dst;
 }
 
 /**
