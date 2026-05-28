@@ -147,7 +147,7 @@ export function evalConfig<T extends object>(
 														return 'InvalidJson';
 													}
 												}
-												return undefined;
+												return v;
 											},
 											asJs: (v: any) => {
 												converter = () => v;
