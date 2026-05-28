@@ -1,5 +1,6 @@
 import {ConfigMarkerPrefix, RegisterConfigMarker} from './markers';
 import {lodashTemplate, lodashGet, lodashToPath, TemplateExecutor} from './lodash-imports';
+import JSON5 from "json5";
 
 /**
  * Helper to convert strings to false (pretty much any other string evaluates to truthy
@@ -135,6 +136,17 @@ export function evalConfig<T extends object>(
 											fromEnv: (v: any) => {
 												if (typeof v === 'string' && typeof process.env[v] === 'string')
 													return process.env[v];
+												return undefined;
+											},
+											parseJson: (v: any) => {
+												if (typeof v === 'string' && v) {
+													try {
+														return JSON5.parse(v);
+													}
+													catch (e) {
+														return 'InvalidJson';
+													}
+												}
 												return undefined;
 											},
 											asJs: (v: any) => {

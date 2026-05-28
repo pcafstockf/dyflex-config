@@ -1,3 +1,7 @@
+## 1.4.0 / 2026-05-28
+* Add fn.parseJson helper.
+* Upgrade dependencies.
+
 ## 1.3.4 / 2026-05-25
 * Fix tupple mergepoint defect.
 

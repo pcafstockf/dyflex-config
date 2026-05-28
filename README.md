@@ -158,6 +158,7 @@ But templating provides a few helper functions:
 * `fn.asNum` Renders output type `number` (e.g. 12, '12', NaN, 'Infinity', etc.) instead of `string`.
 * `fn.asBool` Renders output type `boolean` (e.g. false, 'false', 0, etc) instead of `string`.
 * `fn.asJs` Ensures the config value is whatever was passed into the helper (e.g. `object`, `number`, `string`, etc.) instead of `string`.
+* `fn.parseJson` Parses its `string` input (if not truthy string, returns the input unchanged).
 * `fn.fromEnv` Allows you to retrieve values from process.env.
 * `fn.relTo` Retrieve a property relative to the current object **OR** to a symbol. 
   The input should be specified as a lodash property path. 
