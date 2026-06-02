@@ -1,3 +1,13 @@
+## 2.0.0 / 2026-06-02
+* Small but breaking API changes:
+  * `pkgToConfig` is now async (returns `Promise`). Callers must `await` it.
+  * `LoadConfigFileOpts` no longer uses a `data` property (only affects apps utilizing `dotenv-expand`).
+  * `mergeViaDirectives` is no longer exported from the main entry points.
+  * Removed `setup-fs` module (redundant with `index`).
+  * Initializer priority sort is now numeric.
+* `onEvalError` notification when a helper fails during interpolation.
+* Comprehensive doc updates.
+
 ## 1.4.0 / 2026-05-28
 * Add fn.parseJson helper.
 * Upgrade dependencies.
