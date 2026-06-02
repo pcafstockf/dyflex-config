@@ -1,6 +1,12 @@
 import JSON5 from 'json5';
 import {lodashSet} from './lodash-imports';
 
+const defaultSepRegex = /=(.*)/s;
+
+function escapeRegExp(s: string): string {
+	return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
 /**
  * Process key/value pairs of configuration related data.
  * The key is always assumed to be a valid lodash property path.
@@ -11,20 +17,22 @@ import {lodashSet} from './lodash-imports';
  *  ['key1=value1','key2=value2']
  * If you pass a string, it is assumed to be:
  *  'key1=value1;key2=value2'
+ *
+ * @param pairs  An array of 'key=value' strings, or a single delimited string of pairs.
+ * @param sep    Key/value separator (default '=').  Regex metacharacters are escaped automatically.
+ * @param delim  Pair delimiter when 'pairs' is a single string (default ';').
+ * @returns A nested object constructed from the key/value pairs.
+ * @throws {Error} If any pair has an empty key or an unparseable value.
  */
 export function keyValueToConfig<T = object>(pairs: string[], sep?: string): T;
 export function keyValueToConfig<T = object>(pairs: string, sep?: string, delim?: string): T;
 export function keyValueToConfig<T = object>(pairs: string | string[], sep = '=', delim = ';'): T {
 	if (!pairs)
 		return {} as T;
-	if (!sep)
-		sep = '=';
 	if (!Array.isArray(pairs)) {
-		if (!delim)
-			delim = ';';
 		pairs = pairs.split(delim);
 	}
-	const regExpr = new RegExp(`${sep}(.*)`, 's');
+	const regExpr = sep === '=' ? defaultSepRegex : new RegExp(`${escapeRegExp(sep)}(.*)`, 's');
 	const cmdLineDefs = pairs.reduce((p: Record<string, any>, v: string) => {
 		const kvp = v.trim().split(regExpr).filter(s => !!s);
 		if (kvp.length !== 2 || (!kvp[0].trim() || (!kvp[1].trim())))

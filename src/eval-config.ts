@@ -1,5 +1,5 @@
 import {ConfigMarkerPrefix, RegisterConfigMarker} from './markers';
-import {lodashTemplate, lodashGet, lodashToPath, TemplateExecutor} from './lodash-imports';
+import {lodashGet, lodashTemplate, lodashToPath, TemplateExecutor} from './lodash-imports';
 import JSON5 from "json5";
 
 /**
@@ -31,6 +31,13 @@ function isFalsy(v: any) {
 export type RegistrarFn = (key: symbol, obj: object | undefined, path: string[] | undefined) => void | any
 
 /**
+ * Callback for evaluation errors during template interpolation.
+ * Return a replacement value to use in place of the failed evaluation.
+ * Throw to abort config evaluation (fail-fast).
+ */
+export type OnEvalErrorFn = (error: Error, context: { path: string[], helper?: string, input?: any }) => any;
+
+/**
  * Walk the configuration looking for markers, as well as strings that should be interpolated.
  *
  * @param config    The fully merged configuration.
@@ -41,12 +48,19 @@ export type RegistrarFn = (key: symbol, obj: object | undefined, path: string[] 
  *                   Each key *must* be of the form [A-Za-z\d_$]+ and will be hung off the 'fn.' object during template interpolation.
  *                   Remember, that ultimately what goes back to the templating engine must be a string.
  *                   Your extension [e.g. fn.syncFileReader("/my-path")] must either return a string, or wrap itself with fn.asNum, fn.asBool, or fn.asJs.
+ * @param onEvalError  Optional callback invoked when a helper function fails during template interpolation.
+ *                      If provided, its return value is always used as the replacement (even if undefined).
+ *                      If not provided, the original input is returned on failure.
+ *                      If the callback throws, the error propagates immediately.
  */
 export function evalConfig<T extends object>(
 	config: T,
 	registrar?: RegistrarFn,
-	evalExt?: Record<string, (v: any) => any>
+	evalExt?: Record<string, (v: any) => any>,
+	onEvalError?: OnEvalErrorFn
 ): T {
+	// interpolateExpr matches general <%= ... %> expressions (lodash 'interpolate' mode — string output).
+	// evalExpr matches fn.xxx() calls (lodash 'evaluate' mode — executes side effects like setting converter).
 	const interpolateExpr = /<%=\s*([\s\S]+?)\s*%>/;
 	const evalExpr = /<%=\s*(fn.[A-Za-z\d_$]+\([\s\S]+?\);?)\s*%>/;
 	const propPath: string[] = [];
@@ -134,7 +148,7 @@ export function evalConfig<T extends object>(
 												return String(v);
 											},
 											fromEnv: (v: any) => {
-												if (typeof v === 'string' && typeof process.env[v] === 'string')
+												if (typeof v === 'string' && typeof process !== 'undefined' && typeof process.env !== 'undefined' && typeof process.env[v] === 'string')
 													return process.env[v];
 												return undefined;
 											},
@@ -144,20 +158,16 @@ export function evalConfig<T extends object>(
 														return JSON5.parse(v);
 													}
 													catch (e) {
-														return 'InvalidJson';
+														if (onEvalError)
+															return onEvalError(e instanceof Error ? e : new Error(String(e)), {path: propKeyPath.slice(), helper: 'parseJson', input: v});
+														return v;
 													}
 												}
 												return v;
 											},
 											asJs: (v: any) => {
 												converter = () => v;
-												// It doesn't matter, the converter is set and will give us what we ultimately want back.
-												try {
-													return 'JsPlaceHolder';
-												}
-												catch (e) {
-													return 'TypeError';
-												}
+												return 'JsPlaceHolder';
 											},
 											relTo: (v: any) => {
 												if (typeof v === 'string' && v) {
@@ -170,7 +180,7 @@ export function evalConfig<T extends object>(
 														const targetPath = myPath.concat(...lodashToPath(v));
 														return lodashGet(config, targetPath, undefined);
 													}
-													else {
+													else if (registrar) {
 														const dotIdx = v.indexOf('.');
 														const bracketIdx = v.indexOf('[');
 														const idx = Math.min(dotIdx !== -1 ? dotIdx : Infinity, // If '.' not found, set index to Infinity
@@ -185,7 +195,7 @@ export function evalConfig<T extends object>(
 														}
 													}
 												}
-												else if (typeof v === 'symbol')
+												else if (typeof v === 'symbol' && registrar)
 													return registrar(v, undefined, undefined);
 												return undefined;
 											}

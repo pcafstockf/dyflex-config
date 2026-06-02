@@ -23,12 +23,12 @@ const loadParseDotEnv = async () => {
 	return undefined;
 };
 const loadExpandDotEnv = async () => {
-		try {
-			const dotenvExpand = await import('dotenv-expand');
-			return dotenvExpand.expand;
-		}
-		catch (e) {
-		}
+	try {
+		const dotenvExpand = await import('dotenv-expand');
+		return dotenvExpand.expand;
+	}
+	catch (e) {
+	}
 	return undefined;
 };
 const loadParseYaml = async () => {
@@ -52,15 +52,16 @@ function unsupportedExtensionErr(ext: string) {
 }
 
 /**
- * Similar to some of the 'fs' module overrides, you can pass a BufferEncoding, or an object (optionally containing a BufferEncoding), and data to be interpolated.
- * NOTE:
- *  Interpolation of data specific to the library being used to load the file.
- *      dotenv: Uses dotenv-expand.  If you want to include the current process.env as a data source, you must do so explicitly.
- *          loadConfigFile('.env', {...process.env, ...myData});
+ * Similar to the node:fs module, you can pass a BufferEncoding string directly, or an object with an optional encoding property.
+ * For .env files, any additional properties on the object are made available as expansion variables for dotenv-expand's shell-style ${VAR} resolution.
+ * Pass previously loaded config fragments or process.env to make those values available during expansion.
+ * @example
+ * // Load a .env file with expansion vars from a previously loaded config and process.env
+ * loadConfigFile('.env', { ...previousConfig, ...process.env })
  */
 export type LoadConfigFileOpts = BufferEncoding | {
 	encoding?: BufferEncoding,
-	data: any
+	[key: string]: any
 }
 
 /**
@@ -76,7 +77,7 @@ export async function loadConfigFile<T = object>(filepath: string, opts?: LoadCo
 	if (!stat.isFile()) {
 		const err: NodeJS.ErrnoException = new Error(`Not a file`);
 		err.errno = constants.EISDIR;
-		err.code = 'EISDIR:';
+		err.code = 'EISDIR';
 		throw err;
 	}
 	let encoding: BufferEncoding;
@@ -85,7 +86,7 @@ export async function loadConfigFile<T = object>(filepath: string, opts?: LoadCo
 	else {
 		encoding = opts?.encoding ?? 'utf-8';
 	}
-	let obj: object = undefined as any;
+	let obj: object | undefined;
 	const filename = path.basename(filepath);
 	let ext = path.extname(filename).toLowerCase();
 	// Deal with files that actually start with a dot (e.g. ".env")
@@ -103,7 +104,7 @@ export async function loadConfigFile<T = object>(filepath: string, opts?: LoadCo
 		}, {});
 	}
 	else {
-		const txt = await fs.promises.readFile(filepath, encoding || 'utf-8');
+		const txt = await fs.promises.readFile(filepath, encoding);
 		switch (ext) {
 			case '.env':
 				const parseDotEnv = await loadParseDotEnv();
@@ -112,14 +113,14 @@ export async function loadConfigFile<T = object>(filepath: string, opts?: LoadCo
 				obj = parseDotEnv(txt);
 				const expandDotEnv = await loadExpandDotEnv();
 				if (expandDotEnv) {
-					const providedData = typeof opts === 'object' && opts.data ? opts.data : {};
+					const {encoding: _, ...expandVars} = typeof opts === 'object' ? opts : {};
 					const expData = {
 						processEnv: {
 							...obj
 						},
 						parsed: {
 							...obj,
-							...providedData
+							...expandVars
 						}
 					};
 					const tmp = expandDotEnv(expData as any) as any;

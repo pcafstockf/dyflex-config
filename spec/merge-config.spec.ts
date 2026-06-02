@@ -15,7 +15,7 @@ describe('Configuration Merging', () => {
 	it('should be able to merge configurations from multiple locations', async () => {
 		// Use the base config from our 'include' spec.
 		let config = mergeConfigs<any>({}, [
-			['app', pkgToConfig(__dirname)],
+			['app', await pkgToConfig(__dirname)],
 			await loadConfigFile('./fixtures/.env'),
 			await loadConfigFile('./fixtures/config-e.env'),
 			['tenant', await loadConfigFile('./fixtures/config-a.json')],

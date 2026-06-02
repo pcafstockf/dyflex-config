@@ -1,15 +1,24 @@
 {
 	"name": "dyflex-config",
-	"version": "1.4.0",
-	"description": "Simple, dynamic, flexible, configuration library.",
+	"version": "2.0.0",
+	"description": "Configuration library with multi-source loading, directive-based merging, template interpolation, and DI integration.",
 	"author": "Frank Stock",
 	"license": "MIT",
 	"keywords": [
 		"config",
 		"configuration",
-		"dynamic",
-		"flexible",
-		"interpolate"
+		"merge",
+		"override",
+		"interpolate",
+		"template",
+		"environment",
+		"env",
+		"dotenv",
+		"json5",
+		"yaml",
+		"properties",
+		"compose",
+		"dependency-injection"
 	],
 	"homepage": "https://github.com/pcafstockf/dyflex-config#readme",
 	"repository": {

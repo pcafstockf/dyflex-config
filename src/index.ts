@@ -1,10 +1,9 @@
 export * from './markers';
 export * from './eval-config';
-export * from './merge-config';
+export {mergeConfig, mergeConfigs} from './merge-config';
 export * from './kvp-to-config';
 export * from './initializers';
 export * from './process-initializers';
 export * from './setup';
 export * from './load-fs-config';
 export * from './pkg-to-config';
-export * from './setup-fs';

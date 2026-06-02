@@ -25,7 +25,7 @@ export type Initializers<T = any> = Map<number, InitializerMeta<T>[]>;
 export function discoverInitializers<T = any>(
 	config: object
 ): Initializers {
-	const initializers = {} as Record<number, InitializerMeta<T>[]>;
+	const initializers = new Map<number, InitializerMeta<T>[]>();
 	const propPath: string[] = [];
 	const deepProcess = (obj: any) => {
 		let propKey: PropertyKey;
@@ -38,10 +38,11 @@ export function discoverInitializers<T = any>(
 							const ro = obj[propKey] as InitializerDesc<T>;
 							if (typeof ro.fn === 'function' && (typeof ro.priority === 'number' || typeof ro.priority === 'undefined')) {
 								delete obj[propKey];
-								let a = initializers[ro.priority ?? 0];
+								const priority = ro.priority ?? 0;
+								let a = initializers.get(priority);
 								if (!a) {
 									a = [];
-									initializers[ro.priority ?? 0] = a;
+									initializers.set(priority, a);
 								}
 								a.push({
 									path: propPath.slice(),
@@ -66,12 +67,9 @@ export function discoverInitializers<T = any>(
 	};
 	// Walk the configuration hierarchy
 	deepProcess(config);
-	// Return the initializers in order of priority.
-	return Object.keys(initializers).sort().reduce((p, strKey) => {
-		const numKey = parseInt(strKey, 10);
-		p.set(numKey, initializers[numKey]);
-		return p;
-	}, new Map<number, InitializerMeta<T>[]>());
+	// Return the initializers in order of priority (lowest to highest).
+	const sortedEntries = [...initializers.entries()].sort((a, b) => a[0] - b[0]);
+	return new Map(sortedEntries);
 }
 
 /**
@@ -87,10 +85,9 @@ export function discoverInitializers<T = any>(
  * @param initializers  The initializer functions to execute.
  */
 export async function invokeInitializers<T = any>(ctx: T, initializers: Initializers): Promise<void> {
-	for await (const [_, value] of initializers.entries()) {
+	for (const [_, value] of initializers.entries()) {
 		await Promise.all(value.map(i => i.fn(ctx, i.path, i.obj) ?? Promise.resolve()));
 	}
 }
 
 export * from './initializers';
-

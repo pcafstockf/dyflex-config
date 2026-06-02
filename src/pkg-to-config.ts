@@ -13,14 +13,14 @@ import path from 'node:path';
  *          __APP_NAME__, __APP_VERSION__, __APP_DESCRIPTION__ (the names don't really matter, these are just suggesting).
  *      Then in your application, invoke this function.
  *          // @ts-ignore
- *          const appInfo = pkgToConfig(__dirname, __APP_NAME__, __APP_VERSION__, __APP_DESCRIPTION__);
+ *          const appInfo = await pkgToConfig(__dirname, __APP_NAME__, __APP_VERSION__, __APP_DESCRIPTION__);
  *      Of course since those literals are not defined anywhere, you will need to use @ts-ignore.
  * @param searchDir The directory of whatever file invoked this function.  This is used to assist in locating package.json
  * @param name  Generally only defined if you webpacked using the approach described above.
  * @param version  Generally only defined if you webpacked using the approach described above.
  * @param description  Generally only defined if you webpacked using the approach described above.
  */
-export function pkgToConfig(searchDir?: string, name?: string, version?: string, description?: string) {
+export async function pkgToConfig(searchDir?: string, name?: string, version?: string, description?: string) {
 	// Use are args if we got them, otherwise try to pick up what we need from npm.
 	let appName = name || process.env.npm_package_name || undefined;
 	let appVersion = version || process.env.npm_package_version || undefined;
@@ -30,15 +30,15 @@ export function pkgToConfig(searchDir?: string, name?: string, version?: string,
 		let dir = searchDir ? path.resolve(searchDir) : process.cwd();
 		while (dir.startsWith(process.cwd())) {
 			const fileName = path.join(dir, 'package.json');
-			let stat: fs.Stats;
+			let stat: fs.Stats | undefined;
 			try {
-				stat = fs.statSync(fileName);
+				stat = await fs.promises.stat(fileName);
 			}
 			catch (e) {
-				stat = undefined as any as fs.Stats;
+				stat = undefined;
 			}
 			if (stat?.isFile()) {
-				const txt = fs.readFileSync(fileName, 'utf-8');
+				const txt = await fs.promises.readFile(fileName, 'utf-8');
 				const obj = JSON5.parse(txt);
 				if (obj) {
 					appName = obj.name;

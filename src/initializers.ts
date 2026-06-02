@@ -10,7 +10,7 @@
 export type InitializerFn<T = any> = (ctx: T, path: string[], obj: object) => void | Promise<void>;
 
 /**
- * This is what you embed in your Default configuration (aka object literal).
+ * Embed as the value of {@link InitializeMarker __conf_init} in a default configuration object.
  * Note that this structure contains a function and therefore cannot be embedded in a textual configuration like json or yaml.
  * This is intentional.
  */

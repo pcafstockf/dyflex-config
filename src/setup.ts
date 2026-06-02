@@ -1,4 +1,4 @@
-import {evalConfig} from './eval-config';
+import {evalConfig, OnEvalErrorFn} from './eval-config';
 import {keyValueToConfig} from './kvp-to-config';
 import {mergeConfig, mergeConfigs} from './merge-config';
 import {discoverInitializers, invokeInitializers} from './process-initializers';
@@ -23,6 +23,14 @@ export interface ConfigOpts<CTX = any> {
 	 */
 	evalExt?: Record<string, (v: any) => any>;
 	/**
+	 * Optional callback invoked when a helper function fails during template interpolation.
+	 * If provided, its return value is always used as the replacement (even if undefined).
+	 * If not provided, the original input is returned on failure.
+	 * If the callback throws, the error propagates immediately (fail-fast).
+	 * @see OnEvalErrorFn
+	 */
+	onEvalError?: OnEvalErrorFn;
+	/**
 	 * If truthy, this will trigger both:
 	 *  @see discoverInitializers
 	 *  @see invokeInitializers
@@ -38,12 +46,15 @@ export interface ConfigOpts<CTX = any> {
  * @param overrides A variadic array of configuration objects.
  *                   If an element is itself an array, it will be interpreted as ['merge.point', configObj].
  *                   Otherwise, if an element is *not* an object, it will be ignored.
+ *                   NOTE: Overrides containing Promises (e.g. from loadConfigFile) must be awaited by the caller before passing.
+ *                   Example: ['mysql', await loadConfigFile('.env')]
+ * @returns The same conf object, now fully merged, interpolated, and (if ctx was provided) initialized.
  */
-export async function makeConfig<CONF extends object = object, CTX = any>(conf: CONF, opts: ConfigOpts<CTX>, ...overrides: object[]) {
+export async function makeConfig<CONF extends object = object, CTX = any>(conf: CONF, opts: ConfigOpts<CTX> = {}, ...overrides: object[]) {
 	if (!conf)
 		conf = {} as CONF;
 	mergeConfigs(conf, overrides);
-	evalConfig(conf, opts.evalCb, opts.evalExt);
+	evalConfig(conf, opts.evalCb, opts.evalExt, opts.onEvalError);
 	if (opts.ctx) {
 		const initializers = discoverInitializers(conf);
 		await invokeInitializers(opts.ctx, initializers);

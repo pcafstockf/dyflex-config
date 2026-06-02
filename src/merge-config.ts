@@ -1,4 +1,4 @@
-import {lodashGet, lodashMergeWith, lodashSet, lodashUnionWith, lodashIsEqual} from './lodash-imports';
+import {lodashGet, lodashIsEqual, lodashMergeWith, lodashSet, lodashUnionWith} from './lodash-imports';
 
 /**
  * A unique marker used as the default value for lodashGet.
@@ -45,7 +45,7 @@ const DoesNotHave = Symbol('DoesNotHave');
  * ```
  */
 export function mergeViaDirectives<TObject, TSource>(object: TObject, source: TSource): TObject & TSource {
-	let deletes: (() => void)[] = [];
+	const deletes: (() => void)[] = [];
 	const mergerFn = (objValue: any, srcValue: any, key: string, object: any) => {
 		if (key?.startsWith('!')) {
 			deletes.push(() => {
@@ -54,7 +54,7 @@ export function mergeViaDirectives<TObject, TSource>(object: TObject, source: TS
 			object[key.substring(1)] = srcValue;
 		}
 		else if (key?.startsWith('~')) {
-			if (object[key.substring(1)])
+			if (key.substring(1) in object)
 				object[key.substring(1)] = srcValue;
 			deletes.push(() => {
 				delete object[key];
@@ -69,10 +69,12 @@ export function mergeViaDirectives<TObject, TSource>(object: TObject, source: TS
 			}
 			else if (key?.startsWith('-')) {
 				const existing = object[key.substring(1)];
-				const tbr = new Set(srcValue);
-				for (let i = existing.length - 1; i >= 0; i--) {
-					if (tbr.has(existing[i]))
-						existing.splice(i, 1);
+				if (Array.isArray(existing)) {
+					const tbr = new Set(srcValue);
+					for (let i = existing.length - 1; i >= 0; i--) {
+						if (tbr.has(existing[i]))
+							existing.splice(i, 1);
+					}
 				}
 				deletes.push(() => {
 					delete object[key];
@@ -93,6 +95,11 @@ export function mergeViaDirectives<TObject, TSource>(object: TObject, source: TS
  * Normally data properties that resolve to undefined are skipped if a config value exists.
  * However, data properties whose name begins with a ! bang, are forcefully replaced (minus the bang of course) with the data property value regardless (e.g. null, undefined, etc.).
  * It is possible to merge 'src' into a sub-node of 'dst' by providing a 'mergePoint' in lodash property path notation.
+ *
+ * @param dst  The target configuration object (mutated in place).
+ * @param src  The source object to merge into dst.
+ * @param mergePoint  Optional lodash property path targeting a sub-node of dst.
+ * @returns The mutated dst object.
  */
 export function mergeConfig<T extends object>(dst: T, src: object, mergePoint?: string): T {
 	if (!dst)
@@ -116,6 +123,10 @@ export function mergeConfig<T extends object>(dst: T, src: object, mergePoint?: 
  * Convenience to merge multiple configuration objects in a single go.
  * If any of the configs to be merged is an array, it will be interpreted as ['merge-point', src].
  * Otherwise, each element will be merged as itself.
+ *
+ * @param dst  The target configuration object (mutated in place).
+ * @param src  Array of source objects or [mergePoint, sourceObject] tuples.
+ * @returns The mutated dst object.
  */
 export function mergeConfigs<T extends object>(dst: T, src: (object | [string, object])[]): T {
 	src.forEach(s => {

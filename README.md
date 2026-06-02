@@ -1,208 +1,246 @@
 # dyflex-config
+
 [![CI Actions](https://github.com/pcafstockf/dyflex-config/workflows/CI/badge.svg)](https://github.com/pcafstockf/dyflex-config/actions)
 [![Publish Actions](https://github.com/pcafstockf/dyflex-config/workflows/NPM%20Publish/badge.svg)](https://github.com/pcafstockf/dyflex-config/actions)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
 ![OSS Lifecycle](https://img.shields.io/osslifecycle/pcafstockf/dyflex-config.svg)
 [![npm version](https://img.shields.io/npm/v/dyflex-config)](https://www.npmjs.com/package/dyflex-config)
 
-Simple, dynamic, flexible, modular, extensible, templated, configuration library.
+> **Compose configuration from any source. Resolve the rest.**
 
-## Why another configuration library?
-Many projects need to load configuration.  
-Configuration from command line opts, from env, from json, from properties files, and on and on.  
-Some options vary from environment to environment and from developer to developer.  
-But importantly, some options just don't; They are only there to help future-proof your app.  
-If that's not complicated enough, sometimes you need to pull in **pieces** of config from different locations.  
-And speaking of dynamic configuration, wouldn't functionality like Java's @AutoWire be nice?
+Load from multiple sources, in various formats, merge with fine-grained control, and resolve interpolated values.  
+When optionally paired with dependency injection, configuration fragments become injectable services — automatically wired and ready to use.
 
-## Installation
-You can get the latest release using npm:
-```
-$ npm install dyflex-config --save
-```
-Please note that this library supports a wide variety of runtimes and is distributed as both esm and cjs modules, side by side.
-
-## Concepts
-I believe configuration should be:
-* reference-able (to eliminate duplication)
-* override-able (for different envs)
-* modular (for generation and maintainability)
-* compose-able (to **reverse** modularity 😃 and more easily support override-ability)
-
-## ESM and CommonJS Support
-
-This library recognizes the realities we live in and fully supports both ESM and CommonJS module systems:
-
-**ESM (import):**
-```typescript
-import { makeConfig, mergeConfig, evalConfig } from 'dyflex-config';
+```bash
+npm install dyflex-config
 ```
 
-**CommonJS (require):**
-```javascript
-const { makeConfig, mergeConfig, evalConfig } = require('dyflex-config');
-```
+Works in Node, Deno, Bun, Electron, and browsers.  
+Ships as ESM and CJS.
 
-##  Universal functions:
-- `makeConfig()`
-- `mergeConfig()`
-- `evalConfig()`
-- `keyValueToConfig()`
+---
 
-**Note:** Some functions depend on Node.js-specific APIs:
-
-- `loadConfigFile()` - Uses Node.js `fs` module (not browser-compatible)
-- `pkgToConfig()` - Uses Node.js `fs` module (not browser-compatible)
-
-For browser usage, the package automatically provides a browser-specific entry point which excludes Node.js-only functions.
-Modern bundlers will automatically use this when building for browser environments.
-
-## Show me some code
-Some folks like the details (below), other folks want to see the code first...
-
-As you read the code, keep in mind that for this example:
-* We are trying to show a myriad of features but still keep it simple.
-* There is a .env file in the cwd that contains `host=mysql.prod.example.com`
-* The app will be invoked with `node example.js --defs mysql.user=james`
-* And of course, you would naturally want to use [async-injection](https://github.com/pcafstockf/async-injection/) (but you don't have to).
+## Quick start
 
 ```typescript
-// Simple injectable database manager with injected settings.
-@Injectable()
-class MySqlDbMgr {
-	constructor(@Inject(Symbol.for(my-sql-conf)) conf: MySqlConfiguration) {
-		this.pool = mysql.createPool(conf);
-	}
-	// useful properties and methods.
-}
-const DbMgrToken = new InjectionToken<MySqlDbMgr>('DbMgr');
+import { makeConfig, loadConfigFile, keyValueToConfig } from 'dyflex-config';
 
-// Optionally define the global structure of your app configuration.
-const DefaultAppConfig = {
-	// @ts-ignore  (see pkgToConfig function for details)
-	info: pkgToConfig(__dirname, __APP_NAME__, __APP_VERSION__, __APP_DESCRIPTION__),
-	mysql: {
-		// Flag this as the MySql configurtion object.
-		__conf_register: 'my-sql-conf',
-        // Define the type, but actuall value merged from .env
-		host: undefined as unknown as string,
-		port: 3306,
-		user: undefined as unknown as string,
-        // see evalConfig function to define your own custom interpolators
-		password: '<%= fn.getSecret("my-app-passwd") %>',
-		database: 'my-app-database',
-        // auto-wire a database connection service via dependency injection.
-        // makeConfig (below), creates a fully configured, injectable, database manager.
-		__conf_init: {
-			fn: (di: Container) => di.bindClass(DbMgrToken, MySqlDbMgr).asSingleton()
-		}
-	}
+const defaults = {
+  server: {
+    host: 'localhost',
+    port: 3000,
+  },
+  db: {
+    url: '<%= config.db.host + ":" + config.db.port + "/" + config.db.name %>',
+    host: 'localhost',
+    port: 5432,
+    name: 'myapp',
+  }
 };
 
-// ************ Main entry *****************
-(async (args) => {
-	const di = new Container();
-	// Wire up the configuration for your application.
-	const config = await makeConfig(DefaultAppConfig, 
-                    {
-                        // Helper to bind configuration information into dependency injeciton.
-                        evalCb: (key: symbol, obj: object, path: string[]) => di.bindConstant(key, obj),
-                        // Extensible configuration templating.
-                        evalExt: {getSecret: (filePath) => fs.readFileSync(filePath, 'utf-8').trim()},
-                        ctx: di
-                    },
-                    // merge the .env info into config.mysql
-                    ['mysql', loadConfigFile('.env')],
-                    // merge any command line arguments into the configuration.
-                    keyValueToConfig(args.defs)
-	);
-	// Picked up from your package.json (see pkgToConfig).
-	console.log(`Running ${config.info.name} v${config.info.version}`);
-	// Thanks to async-injection, 'dbMgr' is fully typed as MySqlDbMgr.
-	const dbMgr = di.get(DbMgrToken);   
-})(minimist(process.argv.slice(2))).catch(e => console.error(e));
+const config = await makeConfig(defaults, {},
+  await loadConfigFile('./config.json'),            // merge a JSON/JSON5/YAML file
+  ['db', await loadConfigFile('.env')],              // merge .env values into config.db
+  keyValueToConfig(process.argv.slice(2))            // merge command-line key=value pairs
+);
+
+console.log(config.db.url); // "prod-db.example.com:5432/myapp" (interpolated at access time)
 ```
 
-## Details
+---
 
-### Default Base Configuration (aka object literals).
+## Why dyflex-config?
 
-Default Base Configurations are modular and composable `const` object literals, that contains default values (preferably for local development), 
-which describes the structure (e.g. `interface` type) of the configuration for a given piece of your application.  
-This saves you from having to define a configuration `interface`, as it is derivable from the `const` declaration of the default base configuration  
-(e.g. `type AppConfigType = typeof DefaultAppConfig;`).
+| | |
+|---|---|
+| **Load from anywhere** | JSON, JSON5, YAML, .properties, .ini, .env, code, CLI args |
+| **Merge with precision** | Deep merge by default; directives to force-replace, conditionally replace, merge arrays by element, or remove items |
+| **Cross-reference values** | Template interpolation resolves after merging — any value can reference any other |
+| **Type-safe defaults** | Define config as a `const` literal, derive the type: `type Config = typeof defaults` |
+| **Framework-independent** | Works anywhere TypeScript or JavaScript runs |
+| **Built for DI** | Config fragments register as injectable services and auto-wire at startup |
 
-Your application can define its own (global) default base configuration, by simply merging together 
-default base configurations from various modules within your application.
+## When to use it
 
-### Loading
-[json5](https://www.npmjs.com/package/json5) is required to be present, and always supported.
-[properties-reader](https://www.npmjs.com/package/properties-reader), 
-[dotenv](https://www.npmjs.com/package/dotenv), 
-[yaml](https://www.npmjs.com/package/yaml) are supported if installed.
+**Good fit:**
+- Config assembled from multiple sources, each providing a fragment (e.g. `.env` for db credentials merged into `config.db`)
+- Environment-specific overrides layered on shared defaults
+- Values that reference other values (connection strings, derived paths)
+- DI-driven apps where config fragments should auto-wire services
 
-### Merging
+**Possible overkill:**
+- One config file, no interpolation, no merging, no auto wiring — `JSON.parse` genuinely covers it
 
-You supply the configuration merging process with an array of objects, and it recursively merges these into your global default base configuration.  
-You may also provide configuration fragments and merge them at defined sub-nodes.
-See `mergeConfig`, `loadConfigFile`, `keyValueToConfig`, and `pkgToConfig` for more info.
+---
 
-### Templating (aka Interpolation)
+## How it works
 
-Any object property value in the configuration hierarchy may be templated to reference other configuration properties.  
-`const config = {release: '<%= config.name + "@" + config.version %>'};`    
-This templating step is performed after all merging is completed,
-so the full config hierarchy is available to the template for interpolation.  
-Since templates are strings, the rendered (template output) type is normally `string`.  
-But templating provides a few helper functions:
-* `fn.asNum` Renders output type `number` (e.g. 12, '12', NaN, 'Infinity', etc.) instead of `string`.
-* `fn.asBool` Renders output type `boolean` (e.g. false, 'false', 0, etc) instead of `string`.
-* `fn.asJs` Ensures the config value is whatever was passed into the helper (e.g. `object`, `number`, `string`, etc.) instead of `string`.
-* `fn.parseJson` Parses its `string` input (if not truthy string, returns the input unchanged).
-* `fn.fromEnv` Allows you to retrieve values from process.env.
-* `fn.relTo` Retrieve a property relative to the current object **OR** to a symbol. 
-  The input should be specified as a lodash property path. 
-  If the argument starts with a '.' it is interpreted as a relative path, 
-  otherwise it is interpreted as an absolute path starting at the given symbol (interpreted using Symbol.for).
+`dyflex-config` follows a pipeline: **load → merge → interpolate → initialize**.  
+Each step is useful on its own, but together they can wire your entire application.
 
-Example:  
-`const config = {port: '<%= fn.asNum("8888") %>'};`  
-`const config = {port: '<%= fn.asJs(8888) %>'};`
-See `evalConfig` for more info.
+### 1 · Define defaults
 
-### Initializers (aka auto-wiring)
+Your default configuration is an ordinary object literal — both structure definition and development defaults:
 
-The default base configuration (`const`) fragments, can contain **initializers** which are simply factory functions that
-automatically process configuration data to construct (and typically register) a service with the Dependency Injection Container.  
-This means that adding services to your application is usually as simple as defining a default base configuration.  
-You will likely need to provide configuration override data, such as username and/or password (.env, json, etc.), but that's it!  
-See `discoverInitializers` and `invokeInitializers` for more info.
+```typescript
+const defaults = {
+  http: { port: 3000, host: 'localhost' },
+  db:   { host: 'localhost', port: 5432 }
+};
+```
 
-## Implementation Notes
-lodash.merge is used for configuration merging (along with lodash.set if you are merging at a key prefixed merge point).  
-Understanding how lodash.merge actually works is important, so please read [its documentation](https://lodash.com/docs/#merge).  
-Once you understand it,
-you will see a problem that this library uses  [lodash.mergeWith](https://lodash.com/docs/#mergeWith) to address...
-* How do I merge **or** union two arrays (instead of having the right array simply replace the left).
-* How do I replace an object (as opposed to merging it)?
+The TypeScript type is derived directly: `type AppConfig = typeof defaults`.
 
-By default, we use lodash.union to 'merge' arrays which is (IMO) the intuitive behavior. 
-If you really did want to replace the left array with the right, you can us the 'not' feature described next.  
-To address the second, we implement a "not" ability (aka `!`, aka _bang_, aka _replacement_).  
-This feature allows you to **overwrite** a node in the hierarchy instead of merging.
-Finally, if you want the standard lodash merge behavior for arrays (instead of our default union behavior), 
-you can prefix the key with `%`.
-```json5
-// Merging in this json5 override will "merge" the values into configuration,
-// but completely replace anything at or below 'http.authn' (if it existed).
-{
-  "http": {
-    "!authn": {
-      "username": "foo",
-      "password": "bar"
-    },
-    "some-key": "baz",
-    "%some-array": ["one","two"]
+### 2 · Load and merge overrides
+
+Load from files, env vars, or CLI arguments. Target merges at specific sub-nodes with tuples:
+
+```typescript
+const config = await makeConfig(defaults, {},
+  await loadConfigFile('./config.yaml'),             // merges at the root
+  ['db', await loadConfigFile('.env')],              // merges into config.db
+  keyValueToConfig(['http.port=8080'])               // merges key=value pairs
+);
+```
+
+Supported formats: JSON/JSON5 (built-in), YAML, .properties, .ini, .env (via peer deps).
+
+### 3 · Interpolate
+
+Any string value can reference others using `<%= ... %>` templates.  
+Templates resolve lazily — the full merged config is available at access time:
+
+```typescript
+const defaults = {
+  name: 'myapp',
+  version: '1.0.0',
+  release: '<%= config.name + "@" + config.version %>'
+};
+```
+
+Built-in helpers for type conversion (templates produce strings by default):
+
+| Helper | Returns |
+|:--|:--|
+| `fn.asNum(v)` | `number` |
+| `fn.asBool(v)` | `boolean` |
+| `fn.asJs(v)` | the value as-is (any type) |
+| `fn.parseJson(v)` | parsed JSON object |
+| `fn.fromEnv(v)` | `process.env[v]` |
+| `fn.relTo(v)` | value by relative path or symbol |
+
+Add your own custom helpers via the `evalExt` option.
+
+### 4 · Register and initialize
+
+This is where the pipeline pays off.
+
+Mark a fragment as injectable with `__conf_register`.  
+After merging and interpolation, it's handed to a registrar callback — typically binding into your DI container.
+
+Declare an initializer with `__conf_init`.  
+Initializers run after config is fully built, receiving the DI container as context:
+
+```typescript
+const defaults = {
+  db: {
+    __conf_register: 'db-config',
+    host: 'localhost',
+    port: 5432,
+    password: '<%= fn.fromEnv("DB_PASSWORD") %>',
+    __conf_init: {
+      fn: (container) => container.bindClass(DbPool).asSingleton(),
+      priority: 0
+    }
   }
+};
+
+const container = new Container();
+const config = await makeConfig(defaults, {
+  evalCb: (key, obj) => container.bindConstant(key, obj),
+  ctx: container
+},
+  ['db', await loadConfigFile('.env')]
+);
+
+const pool = container.get(DbPool);  // fully wired with resolved config
+```
+
+Adding a new service is often as simple as defining a configuration fragment.
+The fragment carries its structure, defaults, registration, and wiring — override files supply environment-specific values; the library handles the rest.
+
+Initializers execute in priority order (lowest first), same-priority in parallel.
+
+---
+
+## Merge directives
+
+By default, objects are deep-merged and arrays are unioned (no duplicates).
+Prefix keys to control behavior:
+
+| Prefix | Behavior |
+|:--|:--|
+| `!key` | **Force replace** — overwrites the target completely |
+| `~key` | **Conditional** — only replaces if the key already exists |
+| `%key` | **Element merge** — deep merges arrays element-by-element |
+| `-key` | **Remove** — removes matching elements from target array |
+
+```json5
+{
+  "!server": { "port": 8080 },         // replaces entire server object
+  "~feature_flags": { "beta": true },  // only if feature_flags already exists
+  "-plugins": ["deprecated-plugin"]    // removes from the plugins array
 }
 ```
+
+---
+
+## API
+
+### `makeConfig(defaults, opts, ...overrides)`
+
+All-in-one: merge, interpolate, and initialize.  Returns `Promise<Config>`.
+
+**Options (`ConfigOpts`):**
+
+| Option | Purpose |
+|:--|:--|
+| `evalCb` | Callback for `__conf_register` markers (DI binding) |
+| `evalExt` | Custom template helper functions |
+| `onEvalError` | Callback when a helper fails — return a replacement value, or throw |
+| `ctx` | Passed to initializers (typically a DI container); triggers initializer execution |
+
+Overrides must be pre-resolved — `await` any async sources like `loadConfigFile()`.
+
+### `mergeConfig(dst, src, mergePoint?)`
+Merge `src` into `dst`. Optionally target a sub-node via `mergePoint` (lodash path notation).
+
+### `mergeConfigs(dst, sources)`
+Merge multiple sources. Array elements are `[mergePoint, src]` tuples.
+
+### `evalConfig(config, registrar?, evalExt?, onEvalError?)`
+Walk the config, process markers, and set up template interpolation.
+
+### `loadConfigFile(filepath, opts?)`
+Load a local file as an object. Supports JSON/JSON5 (built-in), YAML, .properties, .ini, .env.
+YAML, properties, and dotenv require their respective peer dependencies.
+For `.env` files, pass previously loaded config or `process.env` as opts to provide expansion variables for dotenv-expand.
+
+### `keyValueToConfig(pairs, sep?, delim?)`
+Convert `key=value` pairs into a nested config object.
+Keys are lodash property paths, so `db.pool.size=10` sets a deeply nested value — useful for overriding any config property from the command line.
+
+### `pkgToConfig(searchDir?, name?, version?, description?)`
+Extract name, version, and description from `package.json` or npm environment. Returns `Promise`.
+
+---
+
+## Browser support
+
+The package provides a browser-safe entry point via the `"browser"` export condition.
+Modern bundlers (webpack, Vite, esbuild) use it automatically.
+Browser builds exclude `loadConfigFile` and `pkgToConfig` (which depend on Node.js `fs`).
+
+## License
+
+[MIT](./License.txt) © 2020–2026 Frank Stock
