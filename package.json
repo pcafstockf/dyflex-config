@@ -1,6 +1,6 @@
 {
 	"name": "dyflex-config",
-	"version": "2.0.0",
+	"version": "2.0.1",
 	"description": "Configuration library with multi-source loading, directive-based merging, template interpolation, and DI integration.",
 	"author": "Frank Stock",
 	"license": "MIT",
@@ -74,7 +74,7 @@
 		"@istanbuljs/nyc-config-typescript": "~1.0.2",
 		"@types/jasmine": "~6.0.0",
 		"@types/lodash": "~4.17.24",
-		"@types/node": "^20.19.41",
+		"@types/node": "^20.19.42",
 		"@types/properties-reader": "~2.1.3",
 		"cross-env": "~10.1.0",
 		"jasmine": "~6.2.0",

@@ -1,10 +1,10 @@
 # dyflex-config
 
 [![CI Actions](https://github.com/pcafstockf/dyflex-config/workflows/CI/badge.svg)](https://github.com/pcafstockf/dyflex-config/actions)
-[![Publish Actions](https://github.com/pcafstockf/dyflex-config/workflows/NPM%20Publish/badge.svg)](https://github.com/pcafstockf/dyflex-config/actions)
+[![npm version](https://img.shields.io/npm/v/dyflex-config)](https://www.npmjs.com/package/dyflex-config)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
 ![OSS Lifecycle](https://img.shields.io/osslifecycle/pcafstockf/dyflex-config.svg)
-[![npm version](https://img.shields.io/npm/v/dyflex-config)](https://www.npmjs.com/package/dyflex-config)
+[![Publish Actions](https://github.com/pcafstockf/dyflex-config/workflows/NPM%20Publish/badge.svg)](https://github.com/pcafstockf/dyflex-config/actions)
 
 > **Compose configuration from any source. Resolve the rest.**
 
