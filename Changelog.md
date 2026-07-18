@@ -1,3 +1,6 @@
+## 2.0.2 / 2026-07-17
+* Type fixes (no code or behavior changes).
+
 ## 2.0.0 / 2026-06-02
 * Small but breaking API changes:
   * `pkgToConfig` is now async (returns `Promise`). Callers must `await` it.

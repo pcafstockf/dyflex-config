@@ -10,13 +10,19 @@ export {keyValueToConfig, mergeConfig, evalConfig, discoverInitializers, invokeI
  */
 export interface ConfigOpts<CTX = any> {
 	/**
-	 * The callback will be invoked for each sub-object discovered in the configuration that has a @see RegisterConfigMarker property.
-	 * This callback is typically used to bind the configuration into a dependency injection container.
+	 * The callback will be invoked in one of two ways.
+	 * For each sub-object discovered in the configuration that has a @see RegisterConfigMarker property.
+	 *  Typically used to bind the configuration into a dependency injection container.
+	 * When library internals need to retrieve a previously bound configuration object.
 	 * @param key   The *value* of the @see RegisterConfigMarker property (which must be a string) converted via Symbol.for().
 	 * @param obj   The object that contained the @see RegisterConfigMarker property.
 	 * @param path  The location of the 'obj' within the configuration.
+	 * @returns     void *or* the previously bound configuration object.
 	 */
-	evalCb?: (key: symbol, obj: object, path: string[]) => void;
+	evalCb?: {
+		(key: symbol, obj: object, path: string[]): void;
+		(key: symbol): object;
+	};
 	/**
 	 * Allows for caller defined interpolation functions.
 	 * @see evalConfig
