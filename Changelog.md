@@ -1,3 +1,8 @@
+## 2.0.3 / 2026-09-22
+* Type fix.
+* Unit tests for merge modifiers.
+* Updated devDependencies
+
 ## 2.0.2 / 2026-07-17
 * Type fixes (no code or behavior changes).
 

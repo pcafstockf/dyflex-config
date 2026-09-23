@@ -28,7 +28,7 @@ function isFalsy(v: any) {
  * The first (and most common way) is to register (aka associate) an object (value) with the symbol (key).
  * The second way 'obj' and 'path' will be undefined and the intent is to **return** the object previously associated with 'symbol'.
  */
-export type RegistrarFn = (key: symbol, obj: object | undefined, path: string[] | undefined) => void | any
+export type RegistrarFn = (key: symbol, obj: object | undefined, path: string[] | undefined) => void | object;
 
 /**
  * Callback for evaluation errors during template interpolation.
